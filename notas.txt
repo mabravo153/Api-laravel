@@ -1,0 +1,164 @@
+estas son las notas del curso de desarrollo web full-stack , iniciaremos con laravel y su instalacion 
+
+usaremos composer el cual es un manejador de paquetes de php, este nos permitira descargar laravel y mantener 
+el framework actualizado 
+
+ES INDISPENSABLE TENER COMPOSER PARA USAR LARAVEL, EN SU DOCUMENTACION LO REQUIERE 
+
+es muy sencillo solo debemos descargar el archivo ejecutable y seguir los pasos
+
+debemos usar la consola de comandos cmd o el git bash e ingresar el siguiente comando, segun la documentacion de laravel 
+hay varios dependiendo del modo que se quiera crear 
+
+esta composer global require laravel/instaler 
+
+tambien esta composer create-proyect laravel/laravel -nombre de proyecto- y la version que queremos 
+en este proyecto y de ahora en adelante aprenderemos esta version 
+
+el comando fianl seria composer create-proyect laravel/laravel -nombre-proyecto- "*"
+si lo ponemos de esta forma, nos descarara la version de laravel mas actual, en este momento es la version 5.8
+en este caso usaremos esa version 
+comproser create-project laravel/laravel api-rest-blog "5.7.*" de esta manera ejecutamos el codigo 
+
+luego de ejecutar el codigo se ejecuta una descarga, esta creara una carpeta que tendra el nombre del proyecto 
+
+nos descarga una serie de carpetas. usando el framework de boostrap, en la  carpeta public encontraremos el index.php
+
+si creamos una api con lavarel, estaremos trabajando en la carpeta app 
+
+
+por lo que he visto del curso, usaremos el modelo vista controlador para el desarrollo de la api 
+
+
+en la carpeta routes, encontraremos las rutas que usaremos. la mas usada sera web 
+
+en la carpeta resources, encontraremos las vistas. 
+
+
+CREAR UN HOST VIRTUAL PARA TRABAJAR CON LARAVEL 
+este paso lo haremos con el fin de no tener que escribir toda la url completa, si no, escribir algo mas similar a una url de un sitio web 
+C:\wamp\bin\apache\apache2.4.9\conf\extra\httpd-vhosts.conf  debemos seguir esta ruta 
+
+<VirtualHost *:80>   
+    DocumentRoot "${INSTALL_DIR}/htdocs/apiblog/api-blog/public"
+    ServerName api-blog.com.devel
+    ServerAlias www.api-blog.com.devel
+    <Directory "${INSTALL_DIR}/htdocs/apiblog/api-blog/public">
+        Options Indexes FollowSymLinks     
+        AllowOverride All
+        Order Deny,Allow
+        Allow from all     
+    </Directory> 
+</VirtualHost> 
+
+el devel hace referencia a desarrollo 
+
+luego de hacer todo esto, debemos entrar a al archivo host en sytem32 etc, ejecutamos como administrador y agregamos la url 
+
+127.0.0.1       localhost
+127.0.0.1   zend2.com.devel
+
+Lo que le estamos indicando es que cuando carguemos cualquiera de esos dominios nos llame a la IP que le indicamos en este caso 127.0.0.1 en lugar de la IP original del dominio si es que la tiene.
+
+seguido a eso reiniciamos el server local 
+
+
+
+
+
+CREAR UNA RUTA 
+para crear una ruta entramos al archivo route,en el archivo web. usamos la palabra reservada Route:: luego usamos el protocolo http que queramos 
+
+
+Route::get('/prueba', function(){
+    return "<p> lo que queramos </p>";
+});
+
+de esta manera hacemos que se presente ese parrafo, como podemos ver esta nos regresa una funcion anonima 
+
+
+pasar valor a la url. lo hacemos de esta manera, debemos agregarle las llaves y poner el parametro, adicionar a eso debemos psarle el parametro a la funcion 
+
+
+Route::get('/prueba/{nombre}', function($nombre){
+    return " <p> Nombre: {$nombre} </p>";
+});
+
+ahora bien, al pasarle el parametro a la url y la funcion, es indispensable pasarle un valor. en caso que no se haga. esto nos dara un error 
+si lo hacems pues nos retorna el nombre o lo que hayamos puesto, agregandole un ? al lado del parametro dew la url {nombre?} de esta manera, esta se volvera opcional 
+solo debemos poner el parametro de la funcion un valor por defecto  function($nombre = null)
+
+nosotros podemos vincular una vista a una ruta o una accion del controlador  
+
+para crear una vista debemos usar, el nombre del archivo.blade.php, blade es el motor de plantillas de laravel 
+
+
+Route::get('/pruebas/{nombre}', function($nombre){
+
+    $nombreVariable = "<p> Nombre: {$nombre} </p>";
+
+    return view('prueba', array(
+        'texto' => $nombreVariable
+    )); 
+});
+de esta manera le pasamos los valores al metodo view, no se imprime nada directamente en la ruta.
+
+ES INDISPENSABLE QUE EL NOMBRE DE LA LLAVE Y EL NOMBRE DE LA VARIABLE SEAN EL MISMO. SI NO ES ASI DARA UN ERROR QUE 
+LA VARIABLE NO ESTA DEFINIDA
+
+las cosas siempre  se deben imrpimir en la vista, sea que venga desde un controlador o lo que sea 
+
+
+
+CREAR UN CONTROLADOR EN LARAVEL
+es recomendable usar la consola de comandos para crear un controlador, ejecutaremos el siguiente codigo 
+php artisan make:controller nombreControler
+artisan es la consola de comandos de laravel, es recomendable que se especifique la palabra controller en el documento ya que esto nos ayudara
+los controladores los encontramos en  app/http/controllers/
+
+MOSTRAR UN CONTROLADOR 
+al usar una ruta, es como si especificaramos una url que esta usara
+
+en este ejemplo usaremos un metodo, este retornara a una vista. la url de la vista es una carpeta dentro de ellas, y separamos el fichero con un punto 
+
+public function Index(){
+       $titulo = "Autos"; 
+       
+       $marcas = ['perro', 'gato', 'delfin'];
+
+       return view('pruebas.index');
+    }
+recuerda que al usar el mvc, las vistas es dodne presentmos todo, el controlador es el que se encarga DE RECIBIR TODOS LOS datos del mismo 
+y el modelo es donde esta toda la logica de negcio 
+
+en el momento de usar alguna variable que s epresente en el controlador. y mostrarla en las vistas, debemos usar {{}} doble llave 
+recuerda que al pasar algo a la vista, debemos enviarle datos con un array. de la siguiente manera 
+
+public function Index(){
+       $titulo = "Autos"; 
+       
+       $marcas = ['perro', 'gato', 'delfin'];
+
+       return view('pruebas.index', array(
+           'titulo' => $titulo, 
+           'marca' => $marcas
+       ));
+    }
+
+este ejemplo es una funcion en el controlador, que sera pasada a una vista, en el return, como podemos ver, debemos especificar la ruta de la vista 
+aparte de eso debemos pasarle los valores en un array. las llaves del array deben ser exactamente iguales a el nombre de las variables 
+
+nota: el forEach en lavarel se usa @forEach 
+
+para presentar o "crear una pagina" desde un controlador. lo hacemos de esta manera
+Route::get('/animales', 'pruebaControlador@Index');
+
+DESARROLLO DE LA API 
+antes que nada, debemos diseñr la base de datos. esto nos ayudara con el desarollo, para lo mismpo podemos usar un programa llamado dia 
+
+luego de descargado debemos empezar a diseñar las tablas. 
+
+nota: es indispensable en las tablas de usuario que manejaremos con lavavel. que creememos tres tablas aparte de las que ya tenemos diseñadas 
+estas son: createAt. esta nos guardara la fecha en la que fue creado el susuario 
+updateAt. la fecha en la cual fue actualizado el usuario 
+y por ultimo remeberToken. es para en caso de usar la utenticacion de laravel. este guarda un token para recordar al usuario
