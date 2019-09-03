@@ -1,5 +1,22 @@
 estas son las notas del curso de desarrollo web full-stack , iniciaremos con laravel y su instalacion 
 
+QUE ES UNA API 
+
+una api es una interfaz de programacion de aplicaciones, basicamente es un conjunto de rutinas y funciones 
+esta permite que los productos se comuniquen con otros sin necesidad de saber como estan implementados 
+esto permite algo asi como el desarrollo de una aplicacion que se comunique con el backend sin afectar el front-end ni el cliente 
+
+
+REST es una interfaz de programacion entre sistemas que use el protocolo http para obtener datos o generar operaciones con lo mismo 
+
+La API REST siempre es independiente del tipo de plataformas o lenguajes: 
+la API REST siempre se adapta al tipo de sintaxis o plataformas con las que se estén trabajando, 
+lo que ofrece una gran libertad a la hora de cambiar o probar nuevos entornos dentro del desarrollo.
+ Con una API REST se pueden tener servidores PHP, Java, Python o Node.js. Lo único que es indispensable es que las 
+ respuestas a las peticiones se hagan siempre en el lenguaje de intercambio de información usado, 
+ normalmente XML o JSON.
+
+
 usaremos composer el cual es un manejador de paquetes de php, este nos permitira descargar laravel y mantener 
 el framework actualizado 
 
@@ -60,7 +77,7 @@ luego de hacer todo esto, debemos entrar a al archivo host en sytem32 etc, ejecu
 Lo que le estamos indicando es que cuando carguemos cualquiera de esos dominios nos llame a la IP que le indicamos en este caso 127.0.0.1 en lugar de la IP original del dominio si es que la tiene.
 
 seguido a eso reiniciamos el server local 
-
+ 
 CREAR UNA RUTA 
 para crear una ruta entramos al archivo route,en el archivo web. usamos la palabra reservada Route:: luego usamos el protocolo http que queramos 
 
@@ -114,7 +131,7 @@ los controladores los encontramos en  app/http/controllers/
 MOSTRAR UN CONTROLADOR 
 al usar una ruta, es como si especificaramos una url que esta usara
 
-en este ejemplo usaremos un metodo, este retornara a una vista. la url de la vista es una carpeta dentro de ellas, y separamos el fichero con un punto 
+ en este ejemplo usaremos un metodo, este retornara a una vista. la url de la vista es una carpeta dentro de ellas, y separamos el fichero con un punto 
 
 public function Index(){
        $titulo = "Autos"; 
@@ -123,10 +140,11 @@ public function Index(){
 
        return view('pruebas.index');
     }
-recuerda que al usar el mvc, las vistas es dodne presentmos todo, el controlador es el que se encarga DE RECIBIR TODOS LOS datos del mismo 
+
+recuerda que al usar el mvc, las vistas es donde presentmos todo, el controlador es el que se encarga DE RECIBIR TODOS LOS datos del mismo 
 y el modelo es donde esta toda la logica de negcio 
 
-en el momento de usar alguna variable que s epresente en el controlador. y mostrarla en las vistas, debemos usar {{}} doble llave 
+en el momento de usar alguna variable que se represente en el controlador. y mostrarla en las vistas, debemos usar {{}} doble llave 
 recuerda que al pasar algo a la vista, debemos enviarle datos con un array. de la siguiente manera 
 
 public function Index(){
@@ -136,7 +154,7 @@ public function Index(){
 
        return view('pruebas.index', array(
            'titulo' => $titulo, 
-           'marca' => $marcas
+           'marcas' => $marcas
        ));
     }
 
@@ -154,6 +172,237 @@ antes que nada, debemos diseñr la base de datos. esto nos ayudara con el desaro
 luego de descargado debemos empezar a diseñar las tablas. 
 
 nota: es indispensable en las tablas de usuario que manejaremos con lavavel. que creememos tres tablas aparte de las que ya tenemos diseñadas 
-estas son: createAt. esta nos guardara la fecha en la que fue creado el susuario 
+estas son: createAt. esta nos guardara la fecha en la que fue creado el usuario 
 updateAt. la fecha en la cual fue actualizado el usuario 
-y por ultimo remeberToken. es para en caso de usar la utenticacion de laravel. este guarda un token para recordar al usuario
+y por ultimo remeberToken. es para en caso de usar la autenticacion de laravel. este guarda un token para recordar al usuario
+
+al estar creando las tablas, debemos crear las relaciones inmediatamente 
+Primary key(id)
+foreign key (fk_idcategories) references Categories(id),
+foreign key (fk_idusers) references Users(id)
+
+de esta manera 
+
+
+luego de crear la base de datos, para conectarla al proyecto de laravel. debemos abrir el archivo .env este nos mostrara todas las opciones de conexion 
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=api_blog
+DB_USERNAME=
+DB_PASSWORD=
+
+  
+
+
+CREAR UN MODELO 
+el modelo en el mvc es el que tiene la logica de negocio. debemos crar un modelo por cada tabla de la base de datos 
+para crear un modelo debemos usar artisan, de igual forma a como creamos un controlador 
+php artisan make:model nombreModelo
+
+
+al crear un modelo debemos especificar la tabla a la que esta asignada y debemos establecer la relaciones entre ellos 
+
+protected $table = 'posts'; de esta manera establecemos el nombre de la tabla. 
+
+public function User(){
+    return $this->belongsTo('App\User', 'fk_iduser');
+}
+
+asi establecemos la relacion, en este caso de muchos a uno, cuando es ese el caso debemos agregar la fk 
+
+ public function Posts(){
+        return $this->hasMany('App/Post'); //de esta manera especificamos la relacion con el modelo post
+ }
+ y asi es de muchos a uno, no hay que agregar otro parametro 
+
+
+
+ MOSTRAR INFORMACION DE LA BASE DE datos
+
+pasar usar los modelos en el controlador debemos llamarlos 
+use App\Categories;
+use App\Posts;
+especificamos la carpeta de dodne se encuentran y los llamamos
+
+
+        //creamos una varialbe con lo que nos traemos de post por ejemplo, esto nos retornara un array 
+        //debemos especificar la variable que sea diferente a alguna ya usada por el el lenguaje, luego llamamos la clase. 
+        //al usar los dos puntos como en este caso, podemos acceder a sus metodos. esto nos devuelve un array como antes dije 
+        $posts = Posts::all(); 
+        
+        foreach($posts as $post){
+            echo "<p>{$post}</p>";
+        }
+        
+        die(); 
+
+    }
+
+   luego de todo crea una ruta, indispensable para poder visualizar el resultado 
+
+   gracias a la relacion que hemos generado con las funciones, podemos acceder a varialbles de otros modelos
+   como lo hacemos. ya que especificamos las variables. debeos acceder a los metodos de relacion, ya sea de 
+   uno a muchos o de muchos a uno. usamos el nombre y luego el campo que queremos obtener 
+
+   como vemos en el ejercicio de arriba estamos accediendo al modelo Posts 
+   echo "<p>{$post->user->name}</p>"; y de esta forma podemos traer la informacion de usuario accediendo a el metodo que conecta Posts con user 
+   y accedemos al campo que queremos 
+
+   cuando haces un $categories = Categories::all(); lo que te trae es un array de metodos aparte de los que tu creaste 
+   cuando haces un foreach, solo retorna los que tu creaste pero igual te retorna un array con toda la informacion de la tabla de l base de dato
+   por lo cual debes acceder al valor que necesitas 
+
+   foreach ($categories as $value) {
+            echo "<h1> {$value->name} </h1>"; 
+aqui hay un ejemplo 
+
+cuando vayas a hacer una relacion. especifica el id del mismo aparte debemos especificar la llave foreanea en la funcion 
+hasMany, ya que en caso de no hacerlo. esto solo nos traera un resultado por cada llave foranea 
+
+
+
+CONTROLADORES, RUTAS Y HTTP 
+controlador: parte que se enarga de recibir datos desde las vistas 
+
+debemos crear un controlador por cada modelo, estoos se escargaran en el caso del usuario, de registrar las entradas y 
+todo lo relacionado.. luego de crear un controlador al crear una funcion en el mismo, es necesario pasarle un objeto Request 
+una una variable $request, si no. no podemos pasarle datos ni peticiones 
+
+RECUERDA SIEMPRE CREAR UNA RUTA DEL CONTROLADOR 
+
+es recomendable que cuando se cree rutas desde la api, se usen rutas como Route::post('/api/lo que se vaya a hacer')
+
+una rest es full cuando se usan los 4 metodos http mas comunes 
+post: insertar o guardar datos desde un formulario 
+get: obtener datos
+put: actualizar datos o recursos 
+delete: borrar los datos o recursos 
+
+
+
+USAR POSTMAN O UN CLIENTE RESTFULL
+si no queremos usar la proteccion que inclue laravel para los formularios, debemos comentarla 
+lo encontramos en kernel         //\App\Http\Middleware\VerifyCsrfToken::class.. esto solo pasa con post 
+
+si queremos usar el cliente rest debemos copiar la ruta que especificamos y usar el metodo que especificamos, si intentamos visualizar la ruta en el 
+navegador nos arrojara este error 
+http://apiblog.com.devel/api/register la ruta 
+The GET method is not supported for this route. Supported methods: POST. este error nos muestra porque estamos intentado acceder a una ruta que usa el metodo post 
+por get 
+
+
+con postman podemos mandarle datos como simulando un formulario. en ese caso. debemos hacer lo siguiente 
+debemos tener en cuenta que el objeto request tiene todos los datos que el cliente envia, por lo cual debemos acceder a los atributos del objeto 
+
+de esta manera sacamos la informacion que se nos envia 
+$name = $request->input('name'); en este caso sacamos el nombre debemos tener en cuenta que el controlador es el que recibe los parametros del cliente 
+por eso lo hacemos ahi, ademas de eso. tener encuenta que en input, se ingresa la llave que este nos envie 
+
+LISTAR LAS RUTAS DEL PROYECTO 
+podemos usar artisan para eso, debemos usar la consola. php artisan route:list 
+eso nos retornara una tabla con todas las rutas 
+
++--------+----------+-------------------+------+-----------------------------------------------------------+--------------+
+| Domain | Method   | URI               | Name | Action                                                    | Middleware   |
++--------+----------+-------------------+------+-----------------------------------------------------------+--------------+
+|        | GET|HEAD | /                 |      | Closure                                                   | web          |
+|        | POST     | api/login         |      | App\Http\Controllers\userController@login                 | web          |
+|        | POST     | api/register      |      | App\Http\Controllers\userController@registro              | web          |
+|        | GET|HEAD | api/user          |      | Closure                                                   | api,auth:api |
+|        | GET|HEAD | categorias/prueba |      | App\Http\Controllers\categoriesController@pruebaCategorie | web          |
+|        | GET|HEAD | post/prueba       |      | App\Http\Controllers\postsController@pruebaPost           | web          |
+|        | GET|HEAD | test              |      | App\Http\Controllers\pruebaController@pruebaoms           | web          |
+|        | GET|HEAD | usuario/prueba    |      | App\Http\Controllers\userController@pruebaUser            | web          |
++--------+----------+-------------------+------+-----------------------------------------------------------+--------------+
+
+de esta manera 
+
+
+
+como hicimos en el proyecto anterior, recuerda que a js le pasabamos un array que convertiamos a json y este array contenia una respuesta 
+aqui haremos exactamente lo mismo, crearemos un array con el estado, el codigo http y un mensaje 
+
+es muy sencillo hacer un json con laravel, debemos usar el metodo response() adicionar a eso debemos usar json() dentro de el debemos pasarle el paramreto 
+que en este caso es el array y aarte debemos pasarle el codigo http que queramos 
+
+$respuesta = array(
+            'estado' => 'completo', 
+            'codigo' => 200, 
+            'descripcion' => 'el resgistro se realizo correctamente'
+        );
+
+return response()->json($respuesta, $respuesta['codigo']);
+de esta manera retornamos un json 
+
+los passos para crear un usuario basicamente siempre sera los mismos. recibir los datos del post, validarlos, verificar el usuario duplicado
+cifrar la contraseña, crear el usuario y esperar respuesta 
+
+recuerda que el front-end nos enviara los requerimientos en un json, por lo cual se debe recibir los datos de esta manera. decodificarlos
+
+los recibimos igual con la instancia de request, este recibe dos parametros, la llave que debe tener el json y el default que es nulo ..
+
+$params = json_decode($json); //de esta manera nos retorna un objeto, si le agregamos el paramtro true, nos retorna un array 
+
+
+validar en laravel, para validar en laravel podemos usar una una libreria llamada Validate 
+
+se ejecuta de la siguiente manera $validate = \Validator::make($params [
+            
+        ]);
+
+este recibe dos parametros, el primer parametro es un array que queremos validar. el segundoson los campos que queremos validar.
+de la siguiente manera.
+
+$validate = \Validator::make($params, [
+            'name'       => 'require|alpha',
+            'lastName'   => 'require|alpha',
+            'userName'   => 'require|alpha',
+            'email'      => 'require|email',
+            'password'   => 'require'
+]);
+
+de esta manera validamos si los campos son validos usando las reglas de validacion del objeto Validator, las podemos encontrar en 
+https://laravel.com/docs/5.8/validation
+
+de esta manera damos respuesta en caso de no validar los campos
+
+        if($validate->fails()){
+            return response()->json($validate->errors(), 400);
+        }
+
+para agregar mas seguridad podemos usar un array_map, este nos retorna un arrany luego de pasar pir una funcion que hayamos aplicado 
+
+en este caso usaremos trim. con el fn de evitar que haya algun elemento o espacio delante de los array 
+
+luego de validar esto, ciframos la contraseña, podemos usar el metodo password_hash()
+
+comprobar usuario duplicado, 
+en si usaramos php en este caso tendriamos que hacer una consulta a la base de datos usando sql. en laravel podemos aprovechar omr del mismo 
+usando una de las reglas de validacion que en este caso sea unique pero debemos agregarle como minimo la tabla donde debe ser unica 
+
+para crear el usuario debemos llamar el modelo de usuarios con el use
+seguido a eso debemos instanciar un objeto del mismo y asi agregarle los parametros necesarios 
+
+por ultimo para guardar los datos en la misma. solo debemos darle save
+
+las fechas las mete automaticamente laravel por medio del orm 
+
+NOTA. es indispensble que created_at y updated_at tengan estos nombres en la base de datos o reemplacemos los nombres en modelo de 
+eloquen. ademas updated_at registra el cambio primero por lo cual es indispensable que esta este primero 
+el nombre de los campos no son relevantes ya que se puede cambiar pero, si el orden de los mismos 
+
+
+INSTALAR JWT 
+JWT json web token, una libreria que este este metodo. crea un token cuando el usuario haga un login se genere un token con la autenticacion de ese token 
+el token servira para autenticar, esto es como un seccion. si el cliente quiere ver cierta parte del front-end la patecion debe llevar este token 
+este token tendra los datos relevantes. si el token es valido, el usuario estara registrado correctamente 
+
+usaremos firebase para hacer esto 
+
+para instalarla debemos abrir composer.json, en require  
+
+
+
+
