@@ -401,8 +401,80 @@ este token tendra los datos relevantes. si el token es valido, el usuario estara
 
 usaremos firebase para hacer esto 
 
-para instalarla debemos abrir composer.json, en require  
+para instalarla debemos abrir composer.json, en require (aqui agregamos las librerias a intalar)
+
+debemos agregarla "firebase/php-jwt": "5.0.0" 5.0 es la version de la misma 
+
+luego vamos a la consola y lanzamos el comando composer update, actualizar las dependencias obsoletas e instala 
+las que no estan 
+
+este metodo es muy seguro ya que en base a los datos del usuario, se crean tokens y si queremos estar autenticados
+se estara enviando el token en las cabezeras y lo decodificaremos en el back-end y tendremos una clave unica que solo tendra la parsona que desarrolla 
 
 
+USAR JWT 
+debemos crear una carpeta helpers en la base de la app,
+creamos un archivo, le damos un namespaces y llamamos los siguientes archivos
+
+use Firebase\JWT\JWT; usar la libreria de jwt 
+use Illuminate\Support\Facades\DB; conectar a la base de datos y hacer consultas y agregamos el modelo de usuario obviamente 
+
+creamos la clase seguimos una serie de pasos 
+
+//buscar si existe el usuario y contraseña 
+
+//comprobar si existen 
+
+//generar el token con los datos del usuario identificado 
+
+//devolver los datos decodificados o el token en funcion de un parametro 
+
+pero antes que nada debemos crear un provider. para incrustar la nueva clase en el framework 
+igual que un modelo y un controlador usamos artisan 
+luego de crear el mismo, debemos ingresar y agregarle esta linea en el metodo register 
+include_once app_path().'/helpers/jwtAuth.php';
+
+seguido a eso debemos ir a config/app.php y registrar el provider  App\Providers\JwtAuthServicesProvider::class, de esta manera. si queremos le creamos 
+un alias asi comoo el de Validator o similares 
+'JwtAuth' => App\helpers\jwtAuth::class, de esta manera
+
+luego de hacer esto. podemos ya usarlo en el controlador que deseemos usar 
+
+es necesario agregar el alias para poder llamarla 
+
+porque creamos un provider?. lo podemos encontrar en este link 
+https://programacionymas.com/blog/service-providers-en-laravel
+
+Los service providers se encargan de toda la configuración necesaria antes de empezar a usar un servicio. Dependiendo del servicio que se va a iniciar, el proveedor se encarga de crear nuevas instancias y posiblemente las relaciones con otros servicios (definir parámetros, oyentes de eventos, middlewares, rutas).
 
 
+luego de hacer todo esto ahora si podemos darle funcionalidad a la funcion de signUp
+
+le pasamos dos parametros que serian el nombre de usaurio y contraseña ademas de eso debemos pasarle algo mas. que seria el token en caso de estar logeado ya 
+por defecto sera null 
+
+hacemos una consulta a la base de datos usando el modelo usuario User::where. esto nos hara una consulta a la base de datos pero debemos pasarle un array 
+con los datos que queremos $user = User::where([  el first nos traera el primer objeto que se muestre 
+                                    'userName' => $userName,
+                                    'password' => $password
+                                    ])->first();
+
+seguido a eso debemos validar si existe, esto es usando un if, si $user es un objeto entoces este existe. unicializamos la variable en false para evitar problemas 
+luego a eso creamos el token. podemos usar la documentacio de la libreria que encontramos aqui https://github.com/firebase/php-jwt
+
+luego retornamos los datos en funcion del parametro  
+if(is_null($getToken)){
+    $data = $jwt;
+}else{
+    $data =$jwtDecode ;
+}
+
+
+luego de eso pasamos al controlador. hacemos los mismos pasos que en login, tomamos los datos que llegan en json, los convertimos en un array, validams que no esten vacios 
+seguido a eso lo valimados con validator, creamos la respuesta en caso de algun error, instanciamos el objeto jwt 
+usamos el metodo signUp. le pasamos los parametros necesarios. seguido a eso, en caso de recibir el token. retornamos la informacion de la base de datos
+si nos retorna el token, se lo pasamos al cliente y este nos lo retornara para validar la sesion  
+
+CREAR UN METODO PARA VALIDAR LOS TOKENS 
+
+crearemos una funcion para validar el token. recibira dos parametros, el token y 

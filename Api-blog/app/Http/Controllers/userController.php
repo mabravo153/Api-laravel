@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\User;
+use App\helpers\jwtAuth;
+
 
 class userController extends Controller
 {
 
 
-    public function registro(Request $request)
-    {
+    public function registro(Request $request) {
 
         //recoger los datos del usuario por post 
 
@@ -45,15 +46,15 @@ class userController extends Controller
                 $respuesta = array(
                     'estado' => 'completado',
                     'codigo' => 200,
-                    'descripcion' => 'se valido correctamente'
+                    'descripcion' => 'se creo correctamente'
                 );
             }
 
             //cifrar contraseña 
-            $contrasena = password_hash($params['password'],PASSWORD_BCRYPT,array('cost' => 12)); 
+            $contrasena = hash('sha256', $params['password']); 
 
 
-            //crear el usuario 
+            //instancias el modelo usuario 
             $user = new User();
 
             $user->name = $params['name'];
@@ -77,8 +78,77 @@ class userController extends Controller
         return response()->json($respuesta, $respuesta['codigo']);
     }
 
-    public function login(Request $request)
-    {
-        return "prueba login";
+    public function login(Request $request){
+        
+        //recibir los datos por post
+
+        $json = $request->input('json', null);
+        $jsonDecode = json_decode($json, true);
+    
+       if(!empty($jsonDecode)){
+
+         //validar los datos 
+
+        $validate = Validator::make($jsonDecode, array(
+            'userName'  => 'required|alpha_dash',
+            'password'   => 'required'
+        ));
+
+        if($validate->fails()){
+            $jwt = array(
+                'estado' => 'error',
+                'codigo' => 406,
+                'mensaje' => $validate->errors() 
+            ); 
+        }else{
+
+            $signUp = new jwtAuth();
+
+            //cifrar la contraseña 
+            $contrasena = hash('sha256', $jsonDecode['password']);
+            
+
+            //retornar datos o token 
+            $jwt = $signUp->signUp($jsonDecode['userName'], $contrasena); // me regresa el token 
+
+            if(!empty($jsonDecode['getToken'])){
+                $jwt = $signUp->signUp($jsonDecode['userName'], $contrasena, true); //me retorna los datos sacados de la base de datos
+            }
+
+        }
+
+        
+
+       }
+          
+        return response()->json($jwt, 200); 
     }
-}
+
+
+    //actualizar datos de usuario 
+    public function update(Request $request){
+        //necesitamos recoger la cabecera que contendra el token
+
+        
+        $token = $request->header('Auth');
+
+        //instanciamos la clase para poder ingresar al metodo 
+        $jwt = new jwtAuth();
+        $verificarToken = $jwt->checkToken($token);
+
+        if($verificarToken){
+            //actualziar el usuario
+        }else{
+            $data = array(
+                'estado' => 'error',
+                'codigo' => 
+            );
+        }
+         
+         
+      return $data;
+
+        
+    }
+
+}//final clase 

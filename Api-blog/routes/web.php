@@ -28,3 +28,4 @@ Route::get('/test', 'pruebaController@pruebaoms');
     //rutas controlador usuario 
     Route::post('/api/register', 'userController@registro');//la ruta podemos ponerle como queramos. pero el metodo del controlador debe ser como esta escrito
     Route::post('/api/login', 'userController@login');
+    Route::post('/api/auth', 'userController@update');
