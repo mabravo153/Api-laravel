@@ -181,7 +181,6 @@ class userController extends Controller
             $user = User::where('id', $usuarioToken->sub)->update($parametros);
 
 
-
             // retornar array con la respuesta 
 
             $data = array(
@@ -208,22 +207,40 @@ class userController extends Controller
 
     public function uploadFoto(Request $request){
         
-        //recoger el fichero 
+        //gracias al middleware nos evitamos tener que autenticar el token en todas las funciones 
 
+        //recibir el fichero 
         $image = $request->file('file0'); // los llamremos de esta manera por el front, qu ellamara los archovos file 0 , 1 , 2
+
+        //validar la imagen 
+
+        $validate = Validator::make($request->all(),[
+            'file0' => 'required|image'
+        ]); 
 
         //guardar la imagen 
 
-        if($image){
-            $imageName = time().$image->getClientOriginalName(); 
-        }
+        if(!$image || $validate->fails()){
+            
+            $data = array(
+                'estado' => 'error',
+                'codigo' => 400,
+                'mensaje' => 'no hay imagen disponible o no es un formato valido'
+            ); 
 
-          //recibir los datos y el encabezado 
-        $data = array(
-            'estado' => 'correcto',
-            'codigo' => 200,
-            'mensaje' => 'la foto se subio correctamente'
-        );
+        }else{
+
+            $imageName = time().$image->getClientOriginalName(); 
+
+            \Storage::disk('users')->put($imageName, \File::get($image));
+
+            $data = array(
+                'estado' => 'correcto',
+                'codigo' => 200,
+                'nombreImage' => $imageName,
+                'mensaje' => 'la foto se subio correctamente'
+            );
+        }
 
         return response()->json($data, $data['codigo']);
     }

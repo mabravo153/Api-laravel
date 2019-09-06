@@ -614,7 +614,7 @@ para poder usar los discos primero debemos configurarlos. eso lo hacemos en el a
 cada 'disco' representa un controlador de almacenamiento y una ubicacion en particular 
 para este proyecto, configuraremos dos. una para la foto de los ususarios y otro para las imagenes del las entradas 
 
-debemos entrar al la carpeta de configuracion al archivo de fliesystem. debemos crear las carpetas de configuracion, para eso solo debemos 
+debemos entrar al la carpeta de configuracion al archivo de filesystem. debemos crear las carpetas de configuracion, para eso solo debemos 
 copiar el storage publico que hay ahi. solo debemos cambiarle el nombre y la ruta a la misma. normalmente es storage\app\nombre 
 
 'users' => [
@@ -623,4 +623,33 @@ copiar el storage publico que hay ahi. solo debemos cambiarle el nombre y la rut
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],
-aqui tenemos un ejemplo,luego de crearlo en el archivo creamos las carpetas 
+aqui tenemos un ejemplo,luego de crearlo en el archivo creamos las carpetas en la ruta storage app 
+en este caso ya tenemos los 'discos' ahora los usaremos 
+
+ahora debemos insertar la imagen a la cual le hemos pasamos los datos de la fecha y el nombre de la misma. debemos usar dos metodos que nos suministra laravel
+primer debemos llamar a la clase Storage. de ahi debemos llamar el metodo put. este nos insertara el contenido en la carpeta o 'disco' que hemos creado 
+tambien debemos llamar el metodo disk de esta manera Storage::disk('disco donde guardaremos)->put('llave, conteneido)
+
+$imageName = time().$image->getClientOriginalName(); 
+            \Storage::disk('users')->put($imageName, \FILE::GET($image));
+
+aqui tenemos un ejemplo debemos especificar el disco donde sera guardado, al pasarle el archivo que pasaremos. usando put 
+recibe dos parametros. el primero es un nombre o llave diria yo  y el segundo es el archivo en si, a este accedemos usando el objeto File::get 
+
+Nota: al usar postman. si queremos pasarle un archivo al documento, usamos en el body, form-data. esta nos da la opcion de enviar fotos 
+
+al vliente enviar la foto, esta nos lo guardara donde hayamos deseado, en este caso es de manera local con "discos" que creamos. pero lo podemos hacer con 
+almacenamiento en la nube si queremos
+
+
+para agregar mas seguridad debemos validar que sea realmente una imagen lo que subimos. usamos el metodo Validator para eso 
+lo hacemos de la manera en la que ya hemos hecho. pero esta vez usaremos una regla llamada image 
+
+nunca podremos negar un objeto o validador, esto no hara nada. en este caso lo validamos de la siguiente manera 
+if(!$image || $validate->fails()){
+            
+    $data = array(
+        'estado' => 'error',
+        'codigo' => 400,
+        'mensaje' => 'no hay imagen disponible'
+    );
