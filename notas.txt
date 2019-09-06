@@ -445,12 +445,14 @@ es necesario agregar el alias para poder llamarla
 porque creamos un provider?. lo podemos encontrar en este link 
 https://programacionymas.com/blog/service-providers-en-laravel
 
-Los service providers se encargan de toda la configuración necesaria antes de empezar a usar un servicio. Dependiendo del servicio que se va a iniciar, el proveedor se encarga de crear nuevas instancias y posiblemente las relaciones con otros servicios (definir parámetros, oyentes de eventos, middlewares, rutas).
+Los service providers se encargan de toda la configuración necesaria antes de empezar a usar un servicio.
+Dependiendo del servicio que se va a iniciar, el proveedor se encarga de crear nuevas instancias y posiblemente las relaciones con otros servicios 
+(definir parámetros, oyentes de eventos, middlewares, rutas).
 
 
-luego de hacer todo esto ahora si podemos darle funcionalidad a la funcion de signUp
+luego de hacer todo esto ahora si podemos darle funcionalidad a la funcion de signUp en el helper en jwtAuth 
 
-le pasamos dos parametros que serian el nombre de usaurio y contraseña ademas de eso debemos pasarle algo mas. que seria el token en caso de estar logeado ya 
+le pasamos dos parametros que serian el nombre de usuario y contraseña ademas de eso debemos pasarle algo mas. que seria el token en caso de estar logeado ya 
 por defecto sera null 
 
 hacemos una consulta a la base de datos usando el modelo usuario User::where. esto nos hara una consulta a la base de datos pero debemos pasarle un array 
@@ -475,6 +477,150 @@ seguido a eso lo valimados con validator, creamos la respuesta en caso de algun 
 usamos el metodo signUp. le pasamos los parametros necesarios. seguido a eso, en caso de recibir el token. retornamos la informacion de la base de datos
 si nos retorna el token, se lo pasamos al cliente y este nos lo retornara para validar la sesion  
 
+SIEMPRE QUE SAQUES ALGO D UNA FUNCION EN EL CONTROLADOR, RECUERDA VOLVERLA UN JSON 
+
+
+
 CREAR UN METODO PARA VALIDAR LOS TOKENS 
 
-crearemos una funcion para validar el token. recibira dos parametros, el token y 
+en este punto ya hemos creado el token y se lo hemos enviado al cliente. ahora este nos lo retorna, debemos validar que el token que nos retorna el cliente es correcto
+
+creamos una funcion en el helper de jwt esta recibe dos parametros, una es el token creado y la otra es un parametro qu e inicializamos en false 
+mas adelante veremos porque
+
+creamos una variable que por defecto estara en false, la variable sera la que usemos para validar el token, o sea el token a este momento es ffalso 
+los tokens al crearse se le añaden comillas, debemos quitarselas. podemos usar replace. seguido a eso, usamos un try ya que esta parte del codigo puede traer algunos errores 
+
+try {
+
+ $tokenDeco = JWT::decode($jwt, $this->key, ['HS256']); 
+} catch (\UnexpectedValueException $th) {
+    $auth = false;
+}catch (\DomainException $th) {
+    $auth = false;
+}
+
+seguido validamos el token, si es un objeto. no esta vacio y ademas tiene un id valido, lo validamos, en caso que no. pues no
+
+ademas debemos RETORNAR los valores 
+
+tambien hacer la validacion, en caso que el segundo argumento de la funcion sea true, devolvemos el token decodificado 
+
+
+
+ACTUALIZAR USUARIO
+
+recuerda crear la ruta, usando el metodo http put 
+
+el token, nos lo estara pasando el cliente por la cabecera por lo cual tomaremos del objeto request. el header 
+lo almacenamos en una variable, seguido a eso instanciamos una clase de jwt, que es nuestor helper, usamos el metodo antes mensionado para validar el token
+
+si la funcion nos retorna true (el token de usuario es valido).
+
+recibimos y convertimos el json que nos lleva en un array 
+
+RECUERDA QUE LLEGAN EN JSON  asi que hay que que decoficicarlo, creamos un array apartir de eso, lo validamos usando validate. seguido a eso 
+en este punto, nos puede dar un error ya que validaremos datos unicos como el email y el username 
+para actualizarlos debemos pasar por alto eso, asi que debemos usar una regla llamada unique, se implementa de la sigueinte manera. debemos pasarle las reglas de validacion 
+pero al momento de validar que sea unica en cierta tabla, debemos hacer lo que veremos a continuacion
+
+'userName'   => ['required', Rule::unique('users')->ignore($usuarioToken->sub)]
+creamos un array pasandole todas las reglas de validacion luego usamos la clase Rule en el link que dejare abajo encontraremos toda la informacion 
+
+https://laravel.com/docs/5.8/validation
+
+decodificamos el token y pasamos como segundo paramentro true, ya que como recuerdas. la funcion para validar el token si vamos a validar y evitar que nos de error 
+por elementos similares debemos pasarle o concatenar el sub o id que el token tiene desde el momento en que lo creamos
+
+en caso de recibir un parametro adiciconal como true, esto nos retorna los datos del usuario  si la verificacion es valida iniciaos el proceso de recibir los datos. 
+
+
+
+removemos los ccampos del array que no queramos actualizar. usamos la funcion unset y le pasamos el parametro que no queremos luego de podemos actualizar los datos 
+eso lo hacemos primero creando una variable. llamando al modelo usuario usando el metodo where al cual debemos pasarle el id, debe ser igual a como esta en la db y la etiqueta 
+que nos trae la informacion del token decodificada 
+
+ya luego de eso pues retornamos la respuesta 
+como validacion adicional podemos ponerle que solo ejecute el codigo si el json que recibimos no esta vacio. aparte de solo recibir el token 
+RECUERDA QUE AL HACER ACTUALIZACIONES DEBEMOS USAR EL METODO HTTP PUT 
+
+
+
+ACTUALIZAR FOTO
+desarrollamos un metodo para esto, como en casos anteriores, el usuario debe estar autenticado. por lo cual requeriremos que este nos envie el token, recibir el cuerpo del mismo 
+etc. para evitar realizar algunos pasos que puede llegar a ser repetitivos, podemos usar middlewares. ahora veremos que es. 
+debemos crearlo como creamos un controlador o algo similar usando artinsa 
+
+primero definamos que es un middleware
+
+Un middleware es un mecanismo que se utiliza para filtrar las peticiones HTTP en una aplicación. 
+Están disponibles desde la versión 5 de Laravel y te permiten agregar capas adicionales a la lógica de tu aplicación.
+El ejemplo mas común de un Middleware es el de autenticación. Este nos serviría, por ejemplo, en un sitio en donde es necesario iniciar sesión y tener ciertos privilegios para poder ver el contenido de determinadas páginas
+
+podemos tomarlo que es como un filtro, que se ejecutrara antes de ejecutar alguna accion del controlador 
+
+luego de esto, podemos crealo ya definitivamente, luego de crearlo lo encontraremos en la carpeta app/http/middleware
+
+al middleware los datos que le pasaremos seran, la seccion donde recibimos el token desde el header, la seccion donde instanciamos la clase jwr y llamamos al metodo 
+el middleware por si mismo es una funcion. esta retorna (return $next($request);) en este caso como pasamos a validar si el token es correcto o no
+podemos hacer lo sigioente 
+
+ if ($verificarToken) {
+            return $next($request);
+         } else {
+             
+            $data = array(
+                'estado' => 'error',
+                'codigo' => 400,
+                'mensaje'=> 'ocurrio un error'
+            );
+
+            return response()->json($data, $data['codigo']);
+         }
+pero eso no es todo, tambien debemos registarlo en la configuracion, en el kernel, lo podemos registrar de varias formas, para si poder usarlo. pero 
+una de la formas mas sencillas de usar es por medio de una ruta, buscamos $routemiddleware y lo agregamos ahi 
+'apiauth' => \App\Http\Middleware\ApiAuthMiddleware::class de esta manera
+
+ahora para poder usarlo, lo agregamos desde la ruta que creamos, en este caso en el ejemplo de subir una foto, lo agregamos luego de la ruta 
+
+https://laravel.com/docs/5.8/middleware#assigning-middleware-to-routes aqui encontrarems mas informacion, debemos recordar que debemos pasar el nombre de la clase 
+por si acaso no nos funciona. si este es el caso y debemos agregar el namespace de la clase, al momento de llamar el middleware. debemos especificar que es una clase 
+->middleware(CheckAge::class); de esta manera 
+
+RECUERDA PASARLE AL Middleware LOS DATOS DE LA CLASE DEL TOKEN SI LOS USARAS 
+
+
+los middleware son alguna especia de 'acortadores de codigo' ya que en algunos casos se pueden usar para tareas repetitivas y tambien sirven de filtro 
+en caso de alguna accion 
+
+
+bueno luego de crear el middleware podemos empezar con la funcion para subir la foto, en este caso como estaremos manejando archivos. usaremos en vez de request imput 
+usaremos file. este metodo nos retorna una instancia de una clase que nos brinda mas metodos para poder interactual con el mismo 
+
+https://laravel.com/docs/5.8/requests#files toda la informacion sobre implementarlos la encntraremos aqui, 
+
+en la funcion lo que haremos sera tomar el archivo usando file. el front-end nos enviara un nombre de archivo especifico. depedendo de las librerias que usaremos
+
+validaremos si hay una foto o no. en caso de haberla. creamos una variable y usamos el metodo time() este nos dara una fecha unica. ademas le concatenamos 
+el nombre real de la foto, esto lo optenemos usando un metodo llamado  ->getClientOriginalName(); 
+
+luego de eso. preparamos el almaceamiento. laravel nos suministra una forma de almacenarlo, es algo 'metodo' que se da por medio de discos 
+
+Dentro de este archivo puede configurar todos sus "discos". Cada disco representa un controlador de almacenamiento y una ubicación de almacenamiento en particular. Las configuraciones de ejemplo para cada controlador compatible se incluyen en el archivo de configuración. 
+Por lo tanto, modifique la configuración para reflejar sus preferencias y credenciales de almacenamiento. podemops encontrar mas informacion en este link 
+https://laravel.com/docs/5.8/filesystem#file-uploads 
+
+para poder usar los discos primero debemos configurarlos. eso lo hacemos en el archivo filesystem 
+cada 'disco' representa un controlador de almacenamiento y una ubicacion en particular 
+para este proyecto, configuraremos dos. una para la foto de los ususarios y otro para las imagenes del las entradas 
+
+debemos entrar al la carpeta de configuracion al archivo de fliesystem. debemos crear las carpetas de configuracion, para eso solo debemos 
+copiar el storage publico que hay ahi. solo debemos cambiarle el nombre y la ruta a la misma. normalmente es storage\app\nombre 
+
+'users' => [
+            'driver' => 'local',
+            'root' => storage_path('app/users'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+aqui tenemos un ejemplo,luego de crearlo en el archivo creamos las carpetas 
