@@ -21,20 +21,16 @@ Route::get('/', function () {
 });
 
 
-Route::get('/test', 'pruebaController@pruebaoms');
-
-
 //RUTAS DEL API 
-    //rutas prueba 
-    Route::get('/usuario/prueba', 'userController@pruebaUser');
-    Route::get('/categorias/prueba', 'categoriesController@pruebaCategorie');
-    Route::get('/post/prueba', 'postsController@pruebaPost');
-
+    
     //rutas controlador usuario 
     Route::post('/api/register', 'userController@registro');//la ruta podemos ponerle como queramos. pero el metodo del controlador debe ser como esta escrito
     Route::post('/api/login', 'userController@login');
     Route::post('/api/upload', 'userController@uploadFoto')->middleware(ApiAuthMiddleware::class);//verificacion del token antes de ejecutar 
-    Route::put('/api/auth', 'userController@update');
+    Route::put('/api/update', 'userController@update');
     Route::get('/api/user/picture/{imagen}', 'userController@getImage');
     Route::get('/api/user/detail/{idUser}', 'userController@infoUser');
    
+    //rutas controlador categorias
+
+    Route::resource('api/categories', 'categoriesController');

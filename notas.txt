@@ -686,3 +686,28 @@ Nota: cuando se crea un proyecto con laravel podemos elegir los campos que sean 
 CATEGORIAS 
 
 
+CONTROLADORES DE Recursos  
+
+Route::resource('photos', 'PhotoController'); 
+
+Esta declaración de ruta única crea múltiples rutas para manejar una variedad de acciones en el recurso. El controlador generado ya tendrá métodos definidos para cada una de estas acciones, 
+incluidas notas que le informan sobre los verbos HTTP y los URI que manejan.
+
+esto es una forma de generar una serie de rutas sin tener que especificarlas, laravel nnos la asignara automaticamente, las rutas de esta forma hacen que la Api 
+sea Rest-Full ya que usa los metodos http mas comunes post, get, put, delete 
+
+podemos hacer muchas cosas con los controladores de recursos, en este link encontraremos mas informacion 
+
+https://laravel.com/docs/5.8/controllers#restful-partial-resource-routes
+
+
+
+SACAR INFORMACION DE LAS CATEGORIAS 
+
+debemos estar pendientes de los metodos que usaremos y las rutas especificas ya que el resource nos crea una
+
+en este caso usaremos el metodo index para retornar todas las categorias, pero debes estar pendiente ya que algunas tienen la misma ruta pero por 
+diferente metodo 
+
+adicional a eso, recuerda importar todas las clases que vayas a usar por ejemplo la de validator, el modelo de categorias, el response y request ya viene por defecto 
+

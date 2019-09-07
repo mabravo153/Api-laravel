@@ -243,7 +243,7 @@ class userController extends Controller
         }
 
         return response()->json($data, $data['codigo']);
-    }
+    }//final uploadFoto
 
 
     public function getImage($imagen){
@@ -269,7 +269,7 @@ class userController extends Controller
         } 
         
 
-    }
+    }//final getImage
 
     public function infoUser($idUser){
        
@@ -293,6 +293,6 @@ class userController extends Controller
 
         return response()->json($response, $response['codigo']);
 
-    }
+    }//final infoUser
 
 }//final clase 
