@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use App\User;
 use App\helpers\jwtAuth;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Http\Response;
 
 class userController extends Controller
 {
@@ -243,6 +243,32 @@ class userController extends Controller
         }
 
         return response()->json($data, $data['codigo']);
+    }
+
+
+    public function getImage($imagen){
+        
+        $exists = \Storage::disk('users')->exists($imagen);
+        
+
+        if ($exists) {
+            $file = \Storage::disk('users')->get($imagen);
+
+           return new Response($file, 200);
+
+
+        }else {
+         
+            $data = array(
+                'estado' => 'error', 
+                'codigo' => 404
+            );
+
+            return response()->json($data, $data['codigo']);
+
+        } 
+        
+
     }
 
 }//final clase 

@@ -653,3 +653,16 @@ if(!$image || $validate->fails()){
         'codigo' => 400,
         'mensaje' => 'no hay imagen disponible'
     );
+
+
+OPTENER IMAGEN 
+
+haremos una funcion para retornar la imagen, sera algo simple. la funcion recibira como parametro el nombre del archivo, 
+
+verificamos si existe, para eso el Objeto storage tiene un metodo, especificamos el disco donde debe estar la imagen aparte usamos exists()
+dentro ponemos el nombre del archivo, esto obviamente nos retornara una respuesta. en caso de ser afirmativo, ejecutamos el codigo para llamar Storage 
+especificamos el disco donde esta guardado el mismo y en vez de usar put para lamacenarlo, usaremos get. $file = \Storage::disk('users')->get($imagen); de esta manera 
+recuerda almacenarlo en una variable 
+
+pase bastante tiempo buscando en la documentacion de laravel si podia usar response()->file() y al usarlo note que este acepta la ruta del archiv. asi que si le pasas el archivo en si. te dara un error 
+si queremos retornar la imagen, debemos usar el objeto Response(), le pasamos como parametros, la imagen y el codigo del mismo

@@ -33,6 +33,7 @@ Route::get('/test', 'pruebaController@pruebaoms');
     //rutas controlador usuario 
     Route::post('/api/register', 'userController@registro');//la ruta podemos ponerle como queramos. pero el metodo del controlador debe ser como esta escrito
     Route::post('/api/login', 'userController@login');
+    Route::post('/api/upload', 'userController@uploadFoto')->middleware(ApiAuthMiddleware::class);//verificacion del token antes de ejecutar 
     Route::put('/api/auth', 'userController@update');
-    Route::post('/api/upload', 'userController@uploadFoto')->middleware(ApiAuthMiddleware::class);
+    Route::get('/api/picture/{imagen}', 'userController@getImage');
    
