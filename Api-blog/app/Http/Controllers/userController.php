@@ -271,4 +271,28 @@ class userController extends Controller
 
     }
 
+    public function infoUser($idUser){
+       
+        $user = User::find($idUser);
+
+        if (is_object($user)) {
+
+            $response = array(
+                'estado'    => 'correcto', 
+                'codigo'    => 200,
+                'mensaje'   => $user
+            );
+
+        }else{
+            $response = array(
+                'estado'    => 'error', 
+                'codigo'    => 404,
+                'mensaje'   => 'el usuario no existe'
+            );
+        }
+
+        return response()->json($response, $response['codigo']);
+
+    }
+
 }//final clase 

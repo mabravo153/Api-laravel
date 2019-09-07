@@ -665,4 +665,24 @@ especificamos el disco donde esta guardado el mismo y en vez de usar put para la
 recuerda almacenarlo en una variable 
 
 pase bastante tiempo buscando en la documentacion de laravel si podia usar response()->file() y al usarlo note que este acepta la ruta del archiv. asi que si le pasas el archivo en si. te dara un error 
-si queremos retornar la imagen, debemos usar el objeto Response(), le pasamos como parametros, la imagen y el codigo del mismo
+si queremos retornar la imagen, debemos usar el objeto Response(), le pasamos como parametros, la imagen y el codigo del mismo. la respuesta de este debemos meterlo en una etiqueta img 
+
+
+
+
+SACAR INFORMACION DEL USUARIO
+
+igual lo haremos como el metodo de sacar la foto, recibiremos un id como parametro. y buscaremos usando el metodo find. este recibe como parametro el id 
+es como si hiciera User::where('id' => $id)->first();
+
+en cambio con find es mucho mas sencillo, solo es User::find($id); seguido a eso pues ya es algo qu debemos verificar si es un objeto
+en caso de serlo pues enviar la informacion que requerimos. si no enviar un mensaje de error 
+
+Nota: cuando se crea un proyecto con laravel podemos elegir los campos que sean visibles y los campos que permaneceran ocultos en el modelo 
+
+
+
+
+CATEGORIAS 
+
+

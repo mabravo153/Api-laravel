@@ -35,5 +35,6 @@ Route::get('/test', 'pruebaController@pruebaoms');
     Route::post('/api/login', 'userController@login');
     Route::post('/api/upload', 'userController@uploadFoto')->middleware(ApiAuthMiddleware::class);//verificacion del token antes de ejecutar 
     Route::put('/api/auth', 'userController@update');
-    Route::get('/api/picture/{imagen}', 'userController@getImage');
+    Route::get('/api/user/picture/{imagen}', 'userController@getImage');
+    Route::get('/api/user/detail/{idUser}', 'userController@infoUser');
    
