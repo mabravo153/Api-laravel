@@ -744,3 +744,9 @@ public function __constructor(){
 la mayoria de esta informacion. la podemos encontrar en la documentacion, en la parte de controladores 
 
 https://laravel.com/docs/5.8/controllers#controller-middleware
+
+
+
+ACTUALIZAR CATEGORIAS   
+al hacer el resource este de paso nos crea una ruta para actualizar la categoria, pero al hacer el list de las rutas. nos arroja que debemos pasarle un parametro que sera el id del 
+la categoria que queremos actualizar 

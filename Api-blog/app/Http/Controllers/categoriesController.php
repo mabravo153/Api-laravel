@@ -65,7 +65,6 @@ class categoriesController extends Controller
     }
 
     //ingresar nueva categoria
-
     public function store(Request $request)
     {
 
@@ -105,13 +104,59 @@ class categoriesController extends Controller
                     'menssaje' => "la categoria {$param['name']} ha sido creada correctamente"
                 );
             }
-        }else{
+        } else {
             $data = array(
                 'estado' => 'error',
                 'codigo' => 400,
                 'menssaje' => "se han enviado datos vacios o erroneos"
-            ); 
+            );
         }
+
+        return response()->json($data, $data['codigo']);
+    }
+
+    //actualizar categoria
+    public function update($id, Request $request)
+    {
+
+        /*RECOGER LOS DATOS */
+
+        $json = $request->input('json', null);
+
+        $param = json_decode($json, true);
+
+        /*VALIDAR QUE NO ESTE VACIO */
+        if (!empty($param)) {
+
+            /*VALIDAR LOS DATOS */
+
+            $validate = Validator::make($param, [
+                'name' => 'required|string'
+            ]);
+
+            /*QUITAR LO QUE NO SE QUIERE ACTUALIZAR */
+
+            unset($param['id']);
+            unset($param['created_at']);
+
+
+            /*ACTUALIZAR*/
+
+            $category = Categories::where('id', $id)->update($param);
+
+            $data = array(
+                'estado' => 'correcto',
+                'codigo' => 200,
+                'mensaje' => $param
+            );
+        } else {
+            $data = array(
+                'estado' => 'error',
+                'codigo' => 404,
+                'mensaje' => 'los datos son erroneos o estan vacios'
+            );
+        }
+        /*ENVIAR RESPUESTA*/
 
         return response()->json($data, $data['codigo']);
     }
