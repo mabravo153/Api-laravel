@@ -8,54 +8,111 @@ use Illuminate\Support\Facades\Validator;
 use App\Categories;
 use App\helpers\jwtAuth;
 
-class categoriesController extends Controller{
-   
+class categoriesController extends Controller
+{
 
-    public function index(){
-        
+    //aplicar middleware 
+    public function __construct()
+    {
+        $this->middleware('apiauth', ['except' => ['index', 'show']]);
+    }
+
+    //retornar todas las categorias 
+    public function index()
+    {
+
         $categories = Categories::all();
 
-        if($categories){
+        if ($categories) {
             $data = array(
                 'estado'    => 'correcto',
                 'codigo'    => 200,
                 'mensaje'   => $categories
             );
-        }else{
+        } else {
             $data = array(
                 'estado'    => 'error',
                 'codigo'    => 404,
                 'mensaje'   => 'no hay categorias disponibles'
             );
         }
-        
+
 
         return response()->json($data, $data['codigo']);
-
     }
 
+    //retornar una categoria 
+    public function show($idCategorie)
+    {
 
-    public function show($idCategorie){
-        
         $categorie = Categories::find($idCategorie);
 
-        if(is_object($categorie)){
+        if (is_object($categorie)) {
             $data = array(
                 'estado' => 'correcto',
                 'codigo' => 200,
                 'mensaje' => $categorie
-            );   
-        }else{
+            );
+        } else {
             $data = array(
                 'estado' => 'error',
                 'codigo' => 404,
                 'mensaje' => 'la categoria no existe'
+            );
+        }
+
+        return response()->json($data, $data['codigo']);
+    }
+
+    //ingresar nueva categoria
+
+    public function store(Request $request)
+    {
+
+        /*RECIBIR LOS DATOS Y CODIGICARLOS */
+        $input = $request->input('json', null);
+        $param = json_decode($input, true);
+
+        /*VALIDAR LOS DATOS*/
+
+        if (!empty($param)) {
+
+            $validate = Validator::make($param, [
+                'name' => 'required|string'
+            ]);
+
+            if ($validate->fails()) {
+                $data = array(
+                    'estado' => 'error',
+                    'codigo' => 400,
+                    'mensaje' => $validate->errors()
+                );
+            } else {
+
+                /*GUARDAR LA CATEGORIA*/
+
+                //instancia el modelo 
+                $insertCategory = new Categories();
+
+                $insertCategory->name = $param['name'];
+
+                $insertCategory->save();
+
+
+                $data = array(
+                    'estado' => 'correcto',
+                    'codigo' => 200,
+                    'menssaje' => "la categoria {$param['name']} ha sido creada correctamente"
+                );
+            }
+        }else{
+            $data = array(
+                'estado' => 'error',
+                'codigo' => 400,
+                'menssaje' => "se han enviado datos vacios o erroneos"
             ); 
         }
 
         return response()->json($data, $data['codigo']);
-
     }
-
-
 }

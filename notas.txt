@@ -366,6 +366,8 @@ $validate = \Validator::make($params, [
 de esta manera validamos si los campos son validos usando las reglas de validacion del objeto Validator, las podemos encontrar en 
 https://laravel.com/docs/5.8/validation
 
+si queremos que nuestro campo reciba espacios incluidos. debemos agregar la regla string 
+
 de esta manera damos respuesta en caso de no validar los campos
 
         if($validate->fails()){
@@ -559,6 +561,8 @@ El ejemplo mas común de un Middleware es el de autenticación. Este nos servir�
 
 podemos tomarlo que es como un filtro, que se ejecutrara antes de ejecutar alguna accion del controlador 
 
+lo creamos usando artisan, php artisan make:middleware nombre
+
 luego de esto, podemos crealo ya definitivamente, luego de crearlo lo encontraremos en la carpeta app/http/middleware
 
 al middleware los datos que le pasaremos seran, la seccion donde recibimos el token desde el header, la seccion donde instanciamos la clase jwr y llamamos al metodo 
@@ -711,3 +715,32 @@ diferente metodo
 
 adicional a eso, recuerda importar todas las clases que vayas a usar por ejemplo la de validator, el modelo de categorias, el response y request ya viene por defecto 
 
+en este caso esta funcion es sencilla, debemos llamar traer toda la informacion creando una variable a la que le asignatemos todas las categorias 
+usando Categories::all(). llamamos al modelo y le solicitamos todo. validamos que traiga algo y lo enviamos en un array usando response 
+
+si no, pues igual enviamos la respuesta 
+
+
+
+para hacer una funcion que nos retorne una sola categoria es algo similar a excepcion que esta requiere que le pasemos un id para realizar la busqueda 
+
+luego usamos el metodo find, le pasamos el id. validamos si is_object() retornamos un json con los datos. en caso contrario retornamos un error 
+
+
+
+INGRESAR CATEGORIES 
+
+al estar usando resources, no queremos que se le aplique el middleware de autenticacion a todas las rutas. para evitar eso debemos crear un metodo consturctor 
+
+Nota:  un metodo contructor sera invocado cada vez que la clase se instancie. en pocas palabras es algo que siempre hara la clase, esto solo funcciona de  forma local 
+ya que los constructores de los elementos padre, no seran llamados en la clase hija 
+
+el metodo constuctor lo hacemos de esta manera 
+
+public function __constructor(){
+        $this->middleware('apiauth', ['except' => ['index', 'show']]);
+} lo que quiere decir es. que aplica el middleware que ya hemos creado, excepto en los metodos que mencionare en el siguiente array 
+
+la mayoria de esta informacion. la podemos encontrar en la documentacion, en la parte de controladores 
+
+https://laravel.com/docs/5.8/controllers#controller-middleware
