@@ -32,5 +32,7 @@ Route::get('/', function () {
     Route::get('/api/user/detail/{idUser}', 'userController@infoUser');
    
     //rutas controlador categorias
-
     Route::resource('api/categories', 'categoriesController');
+
+    //rutas controlador posts 
+    Route::resource('api/posts', 'postsController'); 

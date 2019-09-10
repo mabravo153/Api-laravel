@@ -167,13 +167,13 @@ para presentar o "crear una pagina" desde un controlador. lo hacemos de esta man
 Route::get('/animales', 'pruebaControlador@Index');
 
 DESARROLLO DE LA API 
-antes que nada, debemos diseñr la base de datos. esto nos ayudara con el desarollo, para lo mismpo podemos usar un programa llamado dia 
+antes que nada, debemos diseñar la base de datos. esto nos ayudara con el desarollo, para lo mismpo podemos usar un programa llamado dia 
 
 luego de descargado debemos empezar a diseñar las tablas. 
 
 nota: es indispensable en las tablas de usuario que manejaremos con lavavel. que creememos tres tablas aparte de las que ya tenemos diseñadas 
-estas son: createAt. esta nos guardara la fecha en la que fue creado el usuario 
-updateAt. la fecha en la cual fue actualizado el usuario 
+estas son: created_at. esta nos guardara la fecha en la que fue creado el usuario 
+updated_at. la fecha en la cual fue actualizado el usuario 
 y por ultimo remeberToken. es para en caso de usar la autenticacion de laravel. este guarda un token para recordar al usuario
 
 al estar creando las tablas, debemos crear las relaciones inmediatamente 
@@ -750,3 +750,69 @@ https://laravel.com/docs/5.8/controllers#controller-middleware
 ACTUALIZAR CATEGORIAS   
 al hacer el resource este de paso nos crea una ruta para actualizar la categoria, pero al hacer el list de las rutas. nos arroja que debemos pasarle un parametro que sera el id del 
 la categoria que queremos actualizar 
+
+para actualziarla sera muy sencillo, como dijimos anteriormente pasamos dos parametros, uno es id de la categoria que actualizaremos y otro es el request, 
+recuerda que siempre se debe pasar en el header el token de autenticacion 
+
+seguido a eso, recibimos los datos desde el request, los convertimos en un array, verificamos que no vaya vacio, lo validamos. si es correcto quitamos los elementos del array que no queramos
+actualizamos y enviamos la respuetsa  
+
+
+
+POSTS 
+
+usamos el mismo metodo http que usamos anteriormente, usamos resource. y llamamos los metodos hhtp que nos arrojara los metodos que debemos usar 
+
+haremos metodos muy similiares 
+
+index, llamamos todos los posts, pero tenemos algo adicional con el fin que nos retorne la informacion de las categorias 
+debemos agregear el metodo load(), el parametro que recibe esta funcion es el nombre de la variable la cual recibe los datos traidos de la base de datos en el 
+controlador categories 
+
+$posts = Posts::all()->load('categories'); esto nos retorna añadida un objeto el cual tiene la informacion que nos retorna el metodo index pero en el controlador 
+de categorias 
+
+por lo cual el metodo index del controlador posts nos retorna la informacion del post y la categoria 
+
+
+
+para insertar un post. lo podemos hacer de manera similar a registrar un usuario o una categoria, lo que difiere en este caso. es que en la base de datos 
+debemos ingresar aparte de el titulo, el contenido, la imagen debemos agregarle el id de la categoria. que en este caso nos la envia el cliente y debemos agregar el id del usuario 
+este lo optenemos del token que este mismo nos envia luego de haber hecho login 
+
+del resto todo es similar, retornamos el post ya creado 
+
+
+Actualizar post 
+
+basicamente es similiar a lo que hemos realizado anteriormete.
+recibir los datos.
+convertiros a un array 
+validamos los campos que vamos a recibir 
+quitamos los campos que no deseamos actualizar o campos que actualicen el campo de usuario 
+enviamos la actualizacion 
+
+si queremos que nos retorne el objeto completo actualizado podemos usar al momento de ejecutar la actualizacion el metodo updateOrCreate
+
+este creara el post en caso que no lo este y si esta. lo actualizara, ademas de eso nos retorna el objeto actualizado 
+
+realizando pruebas con este metodo nos esta arrojando un error 
+
+
+borrar post 
+
+segun el resource que creamos debemos usar el metodo destroy y el metodo http delete 
+
+segun la documentacion de laravel, debemos buscar el elemento a eliminar con el find, seguido a eso usamos un metodo llamado delete()
+
+recuerda hacer la validacion si encuentra algo  o no encuentra nada 
+
+
+DAR PERMISOS SOLO AL DUEÑO DEL POST
+
+podemos hacerlo de la siguiente manera. reeemplazamos el find de la eliminacion del post. lo cambiamos por un where,
+seguido a eso aplicamos el id sea el id que nos envian. pero ademas de eso, debemos decodificar el token para poder optener el id del usuario que esta logueado
+
+y solo permitir que este usuario elimine sus post
+
+siempre que vayas a acceder a un metodo o atributo en la clase debes usar la palabra reservada $this

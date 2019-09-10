@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Categories;
-use App\helpers\jwtAuth;
+
 
 class categoriesController extends Controller
 {
@@ -18,8 +18,7 @@ class categoriesController extends Controller
     }
 
     //retornar todas las categorias 
-    public function index()
-    {
+    public function index(){
 
         $categories = Categories::all();
 
