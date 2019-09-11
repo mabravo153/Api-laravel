@@ -12,7 +12,8 @@ use App\helpers\jwtAuth;
 class postsController extends Controller
 {
 
-    private function optenerIdentidad($request){
+    private function optenerIdentidad($request)
+    {
         $header = $request->header('Auth');
         $jwt = new jwtAuth();
         $token = $jwt->checkToken($header, true);
@@ -21,11 +22,13 @@ class postsController extends Controller
     }
 
     public function __construct(){
-        $this->middleware('apiauth', ['except' => ['index', 'show']]);
+
+        $this->middleware('apiauth', ['except' => ['index', 'show', 'getImage', 'returnByCategory', 'returnById']]);
     }
 
 
-    public function index(){
+    public function index()
+    {
         $posts = Posts::all()->load('categories');
 
         if ($posts) {
@@ -82,7 +85,7 @@ class postsController extends Controller
 
             //conseguir usuario autenticado 
 
-           $user = $this->optenerIdentidad($request);
+            $user = $this->optenerIdentidad($request);
 
             //validar 
 
@@ -90,18 +93,18 @@ class postsController extends Controller
 
                 'title'     => 'required',
                 'content'   => 'required',
-                'category'  => 'required', 
+                'category'  => 'required',
                 'image'     => 'required'
 
             ]);
 
-            if($validate->fails()){
+            if ($validate->fails()) {
                 $data = array(
                     'estado'    => 'error',
                     'codigo'    => 400,
                     'mensaje'   => $validate->errors()
                 );
-            }else{
+            } else {
 
                 //guardar 
 
@@ -110,7 +113,7 @@ class postsController extends Controller
                 $post->title = $param['title'];
                 $post->content = $param['content'];
                 $post->fk_idcategories = $param['category'];
-                $post->fk_idusers = $user->sub; 
+                $post->fk_idusers = $user->sub;
                 $post->image = $param['image'];
 
                 $post->save();
@@ -120,12 +123,8 @@ class postsController extends Controller
                     'codigo'    => 200,
                     'mensaje'   => $post
                 );
-
             }
-
-            
-
-        }else{
+        } else {
             $data = array(
                 'estado'    => 'error',
                 'codigo'    => 404,
@@ -137,68 +136,68 @@ class postsController extends Controller
     }
 
     public function update($id, Request $request){
-        
-        $json = $request->input('json', null); 
-        $param = json_decode($json, true); 
 
-        if(!empty($param)){
-            
+        $json = $request->input('json', null);
+        $param = json_decode($json, true);
+
+        $update = Posts::find($id);
+
+        if (!empty($param) && is_object($update)) {
+
             $validate = Validator::make($param, [
                 'title'     => 'required',
                 'content'   => 'required',
                 'image'     => 'required',
                 'fk_idcategories'  => 'required'
-            ]); 
+            ]);
 
 
-            if($validate->fails()){
-                
+            if ($validate->fails()) {
+
                 $data = array(
                     'estado'    => 'error',
                     'codigo'    => 400,
                     'mensaje'   => $validate->errors()
                 );
-
-            }else{
+            } else {
 
                 unset($param['id']);
                 unset($param['created_at']);
                 unset($param['user']);
-                unset($param['id_user']);//por si nos envian informacion que pueda afectar el id del usuario 
+                unset($param['id_user']); //por si nos envian informacion que pueda afectar el id del usuario 
 
-                $update = Posts::where('id', $id)->update($param);
+                $user = $this->optenerIdentidad($request);
+
+                $postUpdate = Posts::where('id', $id)
+                    ->where('fk_idusers', $user->sub)
+                    ->update($param);
 
                 $data = array(
                     'estado'    => 'correcto',
                     'codigo'    => 200,
                     'mensaje'   => $param
                 );
-
             }
-
-        }else{
+        } else {
             $data = array(
                 'estado'    => 'error',
                 'codigo'    => 404,
-                'mensaje'   => 'el elemento enviado se encuantra vacio'
+                'mensaje'   => 'el elemento enviado se encuantra vacio o el id no existe'
             );
-
         }
 
-        return response()->json($data, $data['codigo']); 
-
+        return response()->json($data, $data['codigo']);
     }
 
-
     public function destroy($id, Request $request){
-        
+
         $user = $this->optenerIdentidad($request);
 
         $destroy = Posts::where('id', $id)
-                        ->where('fk_idusers', $user->sub)
-                        ->first();
+            ->where('fk_idusers', $user->sub)
+            ->first();
 
-        if(is_object($destroy)){
+        if (is_object($destroy)) {
             $destroy->delete();
 
             $data = array(
@@ -206,17 +205,103 @@ class postsController extends Controller
                 'codigo'    => 200,
                 'mensaje'   => "el elemento {$destroy->title} se elimino correctamente"
             );
-
-        }else{
+        } else {
             $data = array(
                 'estado'    => 'error',
                 'codigo'    => 400,
                 'mensaje'   => 'el elemento no se encuentra o no tienes permiso de eliminarlo'
             );
         }
-        return response()->json($data,$data['codigo']);
+        return response()->json($data, $data['codigo']);
+    }
+
+    public function uploadFoto(Request $request){
+        
+        $file = $request->file('file0');
+
+       if(!empty($file)){
+
+        $validate  = Validator::make($request->all(), [
+            'file0' => 'required|image'
+        ]);
+
+        if($validate->fails()){
+
+            $data = array(
+                'estado'    => 'error',
+                'codigo'    => 404,
+                'mesaje'    => $validate->errors()
+            );
+
+        }else{
+
+            $photo = time().$file->getClientOriginalName();
+
+            \Storage::disk('image')->put($photo, \File::get($file));
+
+            $data = array(
+                'estado'    => 'correcto',
+                'codigo'    => 200,
+                'mensaje'   => 'se guardo correctamente'
+            );
+
+        }
+
+       }else{
+        $data = array(
+            'estado'    => 'error',
+            'codigo'    => 404,
+            'mesaje'    => 'no se ha enviado una imagen'
+        );
+       }
+
+
+       return response()->json($data, $data['codigo']);
 
     }
 
-    
+    public function getImage($image){
+        
+       $exist  = \Storage::disk('image')->exists($image);
+
+       if(is_object($exist)){
+
+        $imagen = \Storage::disk('image')->get($image);
+
+        return new Response($imagen, 200); //retornamos un archivo en crudo
+
+       }else{
+           $data = [
+            'estado'    => 'error',
+            'codigo'    => 404,
+            'mensaje'   => 'el elemento no exixte'
+           ];
+
+           return response()->json($data, $data['codigo']);
+       }
+
+      
+
+    }
+
+    public function returnByCategory($id){
+
+        $posts = Posts::where('fk_idcategories', $id)->get();
+  
+        return response()->json([
+            'estado'    => 'correcto',
+            'posts'     => $posts
+        ], 200); 
+    }
+
+    public function returnById($id){
+       $post = Posts::where('fk_idusers', $id)->get();
+
+       return response()->json([
+        'estado'    => 'correcto',
+        'posts'     => $post
+    ], 200); 
+
+    }
+
 }

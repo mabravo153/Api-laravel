@@ -614,6 +614,8 @@ Dentro de este archivo puede configurar todos sus "discos". Cada disco represent
 Por lo tanto, modifique la configuración para reflejar sus preferencias y credenciales de almacenamiento. podemops encontrar mas informacion en este link 
 https://laravel.com/docs/5.8/filesystem#file-uploads 
 
+o en https://laravel.com/docs/6.0/filesystem#the-local-driver en caso de ser disco local 
+
 para poder usar los discos primero debemos configurarlos. eso lo hacemos en el archivo filesystem 
 cada 'disco' representa un controlador de almacenamiento y una ubicacion en particular 
 para este proyecto, configuraremos dos. una para la foto de los ususarios y otro para las imagenes del las entradas 
@@ -665,7 +667,7 @@ haremos una funcion para retornar la imagen, sera algo simple. la funcion recibi
 
 verificamos si existe, para eso el Objeto storage tiene un metodo, especificamos el disco donde debe estar la imagen aparte usamos exists()
 dentro ponemos el nombre del archivo, esto obviamente nos retornara una respuesta. en caso de ser afirmativo, ejecutamos el codigo para llamar Storage 
-especificamos el disco donde esta guardado el mismo y en vez de usar put para lamacenarlo, usaremos get. $file = \Storage::disk('users')->get($imagen); de esta manera 
+especificamos el disco donde esta guardado el mismo y en vez de usar put para almacenarlo, usaremos get. $file = \Storage::disk('users')->get($imagen); de esta manera 
 recuerda almacenarlo en una variable 
 
 pase bastante tiempo buscando en la documentacion de laravel si podia usar response()->file() y al usarlo note que este acepta la ruta del archiv. asi que si le pasas el archivo en si. te dara un error 
@@ -816,3 +818,56 @@ seguido a eso aplicamos el id sea el id que nos envian. pero ademas de eso, debe
 y solo permitir que este usuario elimine sus post
 
 siempre que vayas a acceder a un metodo o atributo en la clase debes usar la palabra reservada $this
+
+si queremos hacer mas de una condicion en el where, debemos crear un array con el mismo 
+
+si queremos usar un updateOrCreate debemos usar un array filiable como esta en users con el fin de poder actualizar usuarios masivamente 
+
+
+CREAR UN METODO PARA GUARDAR IMAGEN DEL POST 
+
+debemos usar metodos sililares a los usados anterirmente en la Api, recuerda que debemos recibir la imagen por medio del metodo file 
+de request. como ya a este punto, tenemos creado el disco solo es guardar la imagen. especificando el disco y luefo agregamos put, para agregarlo 
+
+SACAR IMAGEN DEL POST 
+
+es de una manera similar al metodo en users, le pasamos el nombre de la imagen, verificamos que siste en el disco, en caso de existir la optenemos. guaramos en una variable y  creamos un opjeto 
+Response, ya que este nos permitira mandar un elemento puro, en este caso la foto
+
+
+LISTAR LOS POST POR USUARIO Y CATEGORIA 
+
+realmente es muy sencillo. debemos solo realizar una consulta usando el metodo where, a la funcion debemos pasarle un id. en este caso seria el de la categoria. si queremos 
+retornar por categorias. pasamos el id y retornamos todos por el metodo get, cuando este metodo se usa siempre retorna algo, asi sea un array vacio por lo cual siempre sera un objeto y no estara vacio 
+
+
+El método get devuelve un Illuminate \ Support \ Collection que contiene los resultados donde cada resultado es una instancia del objeto PHP stdClass. 
+< Puede acceder al valor de cada columna accediendo a la columna como una propiedad del objeto
+
+RECOMENDABLE QUE LOS METODOS GET QUEDEN EXCLUIDOS DE LA AUTENTICACION POR TOKEN O SEA FUERA DEL Middleware 
+
+
+CONFIGURAR EL CORS  
+
+esto lo hacemos con el fin de evitar errores al momento de hacer peticiones ajax, al estar en dos dominios diferenes el front-end con el back-end 
+
+el acceso cruzado entre dominio u origenes o cors
+
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Allow: GET, POST, OPTIONS, PUT, DELETE");
+$method = $_SERVER['REQUEST_METHOD'];
+if($method == "OPTIONS") {
+    die();
+}
+
+debemos copiar este trozo de codigo. que encontraremos en este sitio
+https://victorroblesweb.es/2017/04/23/cabeceras-http-php-permitir-acceso-cors/
+
+luego abrimos la carpeta public, nos dirigimos al index. y en la parte superior lo pegamos. 
+en la seccion que dice 'Access-Control-Allow-Origin: *' aqui podemos poner si queremos solo recibir peticiones de un origen concreto, debemos poner la url 
+de la api en este caso, al ser una api para el back-end lo que tendriamos que poner seria algo como 
+fron-endmyapp.com. 
+
+recuerda que usamos una cabecera especifica para pasar el token de usuario. asi que debemos aceptarla agregandola en el header

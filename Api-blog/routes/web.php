@@ -36,3 +36,7 @@ Route::get('/', function () {
 
     //rutas controlador posts 
     Route::resource('api/posts', 'postsController'); 
+    Route::post('api/posts/upload', 'postsController@uploadFoto');
+    Route::get('api/posts/image/{image}', 'postsController@getImage');
+    Route::get('api/posts/categories/{id}', 'postsController@returnByCategory');
+    Route::get('api/posts/id/{id}', 'postsController@returnById');
