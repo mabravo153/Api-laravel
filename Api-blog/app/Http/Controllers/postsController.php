@@ -34,7 +34,7 @@ class postsController extends Controller
         if ($posts) {
 
             $data = array(
-                'estado'    => 'completo',
+                'estado'    => 'correcto',
                 'codigo'    => 200,
                 'mensaje'   => $posts
             );

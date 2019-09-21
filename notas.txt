@@ -197,7 +197,7 @@ DB_PASSWORD=
 
 
 CREAR UN MODELO 
-el modelo en el mvc es el que tiene la logica de negocio. debemos crar un modelo por cada tabla de la base de datos 
+el modelo en el mvc es el que tiene la logica de negocio. debemos crear un modelo por cada tabla de la base de datos 
 para crear un modelo debemos usar artisan, de igual forma a como creamos un controlador 
 php artisan make:model nombreModelo
 
@@ -210,7 +210,7 @@ public function User(){
     return $this->belongsTo('App\User', 'fk_iduser');
 }
 
-asi establecemos la relacion, en este caso de muchos a uno, cuando es ese el caso debemos agregar la fk 
+asi establecemos la relacion, en este caso de muchos a uno, cuando es ese el caso debemos agregar la fk y el id local 
 
  public function Posts(){
         return $this->hasMany('App/Post'); //de esta manera especificamos la relacion con el modelo post
@@ -218,6 +218,9 @@ asi establecemos la relacion, en este caso de muchos a uno, cuando es ese el cas
  y asi es de muchos a uno, no hay que agregar otro parametro 
 
 
+cuando vayas a hacer una relacion. especifica el id del mismo aparte debemos especificar la llave foreanea en la funcion 
+hasMany, ya que en caso de no hacerlo. esto solo nos traera un resultado por cada llave foranea 
+ 
 
  MOSTRAR INFORMACION DE LA BASE DE datos
 
@@ -258,9 +261,6 @@ especificamos la carpeta de dodne se encuentran y los llamamos
             echo "<h1> {$value->name} </h1>"; 
 aqui hay un ejemplo 
 
-cuando vayas a hacer una relacion. especifica el id del mismo aparte debemos especificar la llave foreanea en la funcion 
-hasMany, ya que en caso de no hacerlo. esto solo nos traera un resultado por cada llave foranea 
-
 
 
 CONTROLADORES, RUTAS Y HTTP 
@@ -291,7 +291,7 @@ navegador nos arrojara este error
 http://apiblog.com.devel/api/register la ruta 
 The GET method is not supported for this route. Supported methods: POST. este error nos muestra porque estamos intentado acceder a una ruta que usa el metodo post 
 por get 
-
+, 
 
 con postman podemos mandarle datos como simulando un formulario. en ese caso. debemos hacer lo siguiente 
 debemos tener en cuenta que el objeto request tiene todos los datos que el cliente envia, por lo cual debemos acceder a los atributos del objeto 
@@ -336,7 +336,7 @@ $respuesta = array(
 return response()->json($respuesta, $respuesta['codigo']);
 de esta manera retornamos un json 
 
-los passos para crear un usuario basicamente siempre sera los mismos. recibir los datos del post, validarlos, verificar el usuario duplicado
+los passos para crear un usuario basicamente siempre sera los mismos. recibir los datos del post, validarlos, verificar el usuario duplicado. esto lo hacemos con unique 
 cifrar la contraseña, crear el usuario y esperar respuesta 
 
 recuerda que el front-end nos enviara los requerimientos en un json, por lo cual se debe recibir los datos de esta manera. decodificarlos
@@ -352,7 +352,7 @@ se ejecuta de la siguiente manera $validate = \Validator::make($params [
             
         ]);
 
-este recibe dos parametros, el primer parametro es un array que queremos validar. el segundoson los campos que queremos validar.
+este recibe dos parametros, el primer parametro es un array que queremos validar. el segundo son los campos que queremos validar.
 de la siguiente manera.
 
 $validate = \Validator::make($params, [
@@ -374,14 +374,17 @@ de esta manera damos respuesta en caso de no validar los campos
             return response()->json($validate->errors(), 400);
         }
 
-para agregar mas seguridad podemos usar un array_map, este nos retorna un arrany luego de pasar pir una funcion que hayamos aplicado 
+para agregar mas seguridad podemos usar un array_map, este nos retorna un array luego de pasar por una funcion que hayamos aplicado 
 
-en este caso usaremos trim. con el fn de evitar que haya algun elemento o espacio delante de los array 
+en este caso usaremos trim. con el fin de evitar que haya algun elemento o espacio delante de los array 
+
+  //limpiar datos de espacios
+    $params = array_map('trim', $params);
 
 luego de validar esto, ciframos la contraseña, podemos usar el metodo password_hash()
 
 comprobar usuario duplicado, 
-en si usaramos php en este caso tendriamos que hacer una consulta a la base de datos usando sql. en laravel podemos aprovechar omr del mismo 
+si usaramos php en este caso tendriamos que hacer una consulta a la base de datos usando sql. en laravel podemos aprovechar omr del mismo 
 usando una de las reglas de validacion que en este caso sea unique pero debemos agregarle como minimo la tabla donde debe ser unica 
 
 para crear el usuario debemos llamar el modelo de usuarios con el use
@@ -437,7 +440,7 @@ luego de crear el mismo, debemos ingresar y agregarle esta linea en el metodo re
 include_once app_path().'/helpers/jwtAuth.php';
 
 seguido a eso debemos ir a config/app.php y registrar el provider  App\Providers\JwtAuthServicesProvider::class, de esta manera. si queremos le creamos 
-un alias asi comoo el de Validator o similares 
+un alias asi como el de Validator o similares 
 'JwtAuth' => App\helpers\jwtAuth::class, de esta manera
 
 luego de hacer esto. podemos ya usarlo en el controlador que deseemos usar 
@@ -463,7 +466,7 @@ con los datos que queremos $user = User::where([  el first nos traera el primer 
                                     'password' => $password
                                     ])->first();
 
-seguido a eso debemos validar si existe, esto es usando un if, si $user es un objeto entoces este existe. unicializamos la variable en false para evitar problemas 
+seguido a eso debemos validar si existe, esto es usando un if, si $user es un objeto entoces este existe. inicializamos la variable en false para evitar problemas 
 luego a eso creamos el token. podemos usar la documentacio de la libreria que encontramos aqui https://github.com/firebase/php-jwt
 
 luego retornamos los datos en funcion del parametro  
@@ -474,7 +477,7 @@ if(is_null($getToken)){
 }
 
 
-luego de eso pasamos al controlador. hacemos los mismos pasos que en login, tomamos los datos que llegan en json, los convertimos en un array, validams que no esten vacios 
+luego de eso pasamos al controlador. hacemos los mismos pasos que en login, tomamos los datos que llegan en json, los convertimos en un array, validamos que no esten vacios 
 seguido a eso lo valimados con validator, creamos la respuesta en caso de algun error, instanciamos el objeto jwt 
 usamos el metodo signUp. le pasamos los parametros necesarios. seguido a eso, en caso de recibir el token. retornamos la informacion de la base de datos
 si nos retorna el token, se lo pasamos al cliente y este nos lo retornara para validar la sesion  
@@ -487,7 +490,7 @@ CREAR UN METODO PARA VALIDAR LOS TOKENS
 
 en este punto ya hemos creado el token y se lo hemos enviado al cliente. ahora este nos lo retorna, debemos validar que el token que nos retorna el cliente es correcto
 
-creamos una funcion en el helper de jwt esta recibe dos parametros, una es el token creado y la otra es un parametro qu e inicializamos en false 
+creamos una funcion en el helper de jwt esta recibe dos parametros, una es el token creado y la otra es un parametro que inicializamos en false 
 mas adelante veremos porque
 
 creamos una variable que por defecto estara en false, la variable sera la que usemos para validar el token, o sea el token a este momento es ffalso 
@@ -534,11 +537,10 @@ https://laravel.com/docs/5.8/validation
 decodificamos el token y pasamos como segundo paramentro true, ya que como recuerdas. la funcion para validar el token si vamos a validar y evitar que nos de error 
 por elementos similares debemos pasarle o concatenar el sub o id que el token tiene desde el momento en que lo creamos
 
-en caso de recibir un parametro adiciconal como true, esto nos retorna los datos del usuario  si la verificacion es valida iniciaos el proceso de recibir los datos. 
+en caso de recibir un parametro adicional como true, esto nos retorna los datos del usuario  si la verificacion es valida iniciamos el proceso de recibir los datos. 
 
 
-
-removemos los ccampos del array que no queramos actualizar. usamos la funcion unset y le pasamos el parametro que no queremos luego de podemos actualizar los datos 
+removemos los campos del array que no queramos actualizar. usamos la funcion unset y le pasamos el parametro que no queremos luego de podemos actualizar los datos 
 eso lo hacemos primero creando una variable. llamando al modelo usuario usando el metodo where al cual debemos pasarle el id, debe ser igual a como esta en la db y la etiqueta 
 que nos trae la informacion del token decodificada 
 
@@ -572,7 +574,7 @@ podemos hacer lo sigioente
  if ($verificarToken) {
             return $next($request);
          } else {
-             
+
             $data = array(
                 'estado' => 'error',
                 'codigo' => 400,
@@ -598,10 +600,10 @@ los middleware son alguna especia de 'acortadores de codigo' ya que en algunos c
 en caso de alguna accion 
 
 
-bueno luego de crear el middleware podemos empezar con la funcion para subir la foto, en este caso como estaremos manejando archivos. usaremos en vez de request imput 
+bueno luego de crear el middleware podemos empezar con la funcion para subir la foto, en este caso como estaremos manejando archivos. usaremos en vez de request input 
 usaremos file. este metodo nos retorna una instancia de una clase que nos brinda mas metodos para poder interactual con el mismo 
 
-https://laravel.com/docs/5.8/requests#files toda la informacion sobre implementarlos la encntraremos aqui, 
+https://laravel.com/docs/5.8/requests#files toda la informacion sobre implementarlos la encontraremos aqui, 
 
 en la funcion lo que haremos sera tomar el archivo usando file. el front-end nos enviara un nombre de archivo especifico. depedendo de las librerias que usaremos
 

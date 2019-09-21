@@ -65,7 +65,7 @@ class userController extends Controller
 
             //enviamos respuesta
             $respuesta = array(
-                    'estado' => 'completado',
+                    'estado' => 'correcto',
                     'codigo' => 200,
                     'descripcion' => 'el usuario se creo correctamente'
             );
@@ -76,7 +76,7 @@ class userController extends Controller
             $respuesta = array(
                 'estado' => 'error',
                 'codigo' => 404,
-                'descripcion' => 'los campos enviados no son correctos'
+                'descripcion' => 'los campos enviados no son correctos o estan vacios'
             );
         }
 
