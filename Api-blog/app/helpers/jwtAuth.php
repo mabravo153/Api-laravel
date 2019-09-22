@@ -65,14 +65,13 @@ class jwtAuth
             }
         } else {
 
-            $data = [
-            'estado' => 'error',
-            'codigo' => 200,
-            'mensaje' => 'login incorrecto'
-            ];
-                
-      
-        } 
+            $data = array(
+                'estado' => 'error',
+                'mensaje' => 'login incorrecto',
+                'codigo' => 404
+            );
+
+        }
 
         return $data;
     }
