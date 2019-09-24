@@ -174,6 +174,7 @@ class userController extends Controller
                 unset($parametros['create_at']);//parametros que en este caso no queramos actualizar 
                 unset($parametros['rememberToken']);
                 unset($parametros['role']);
+                unset($parametros['getToken']);
 
 
             // actualizar datos en la bd 
