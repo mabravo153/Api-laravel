@@ -152,8 +152,8 @@ class userController extends Controller
 
             //validar los datos 
             $validate = Validator::make($parametros,[
-                'name'       => 'required|alpha',
-                'lastName'   => 'required|alpha',
+                'name'       => 'required|alpha_dash',
+                'lastName'   => 'required|alpha_dash',
                 'userName'   => ['required','alpha_dash',  Rule::unique('users')->ignore($usuarioToken->sub)],
                 'email'      => ['required', 'email', Rule::unique('users')->ignore($usuarioToken->sub)],//esto es la informacion que nos trae el token creado en jwtAuth      
             ]);
